@@ -2,9 +2,9 @@
 
 namespace App\Schema;
 
-use App\Schema\TableSchema;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Facades\App\Schema\InterpreterFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
@@ -253,7 +253,7 @@ class SchemaMigrator
 
         $callback = function () use ($migration, $method, $dump, $connection) {
             foreach ($this->getQueries($migration, $method) as $query) {
-                $queries = $this->getQueriesDiff($query['query'], $dump);
+                $queries = $this->getQueriesDiff($migration, $query['query'], $dump);
                 if ($queries) {
                     foreach($queries as $query) {
                         $connection->statement($query);
@@ -279,7 +279,7 @@ class SchemaMigrator
         foreach ($this->getQueries($migration, $method) as $query) {
             $name = get_class($migration);
             
-            $queries = $this->getQueriesDiff($query['query'], $dump);
+            $queries = $this->getQueriesDiff($migration, $query['query'], $dump);
             if ($queries) {
                 foreach($queries as $query) {
                     $this->note("<info>{$name}:</info> {$query}");
@@ -296,69 +296,15 @@ class SchemaMigrator
      * @param  array  $dump
      * @return array
      */
-    protected function getQueriesDiff($query, $dump)
+    protected function getQueriesDiff($migration, $query, $dump)
     {
-        if ($this->isTableQuery($query)) {
-            $current = $this->getTableQuery($dump);
-            if ($current) {
-                $before = new TableSchema($current);
-                $after = new TableSchema($query);
-                if (! $before->equals($after)) {
-                    return $after->diffSql($before);
-                }
+        $connection = $this->resolveConnection(
+            $migration->getConnection()
+        );
 
-                return null;
-            }
-        }
-
-        if ($this->isIndexQuery($query)) {
-            $current = $this->getIndexQuery($dump, $this->getIndexName($query));
-            if ($current) {
-                return null;
-            }
-        }
-
-        return [$query];
-    }
-
-    private function isIndexQuery($query)
-    {
-        return strpos(strtolower($query), 'create index') !== false 
-            || strpos(strtolower($query), 'create unique index') !== false;
-    }
-
-    private function getIndexName($query)
-    {
-        $query = str_replace('create unique index ', '', $query);
-        $query = str_replace('create index ', '', $query);
-        return str_replace('"', '', explode(" ", $query)[0]);
-    }
-
-    private function getIndexQuery($dump, $index)
-    {
-        foreach($dump as $query) {
-            if ($query->type == 'index' && $query->name == $index) {
-                return strtolower($query->sql);
-            }
-        }
-
-        return null;
-    }
-
-    private function isTableQuery($query)
-    {
-        return strpos(strtolower($query), 'create table') !== false;
-    }
-
-    private function getTableQuery($dump)
-    {
-        foreach($dump as $query) {
-            if ($query->type == 'table') {
-                return strtolower($query->sql);
-            }
-        }
-
-        return null;
+        return InterpreterFactory::connection($connection)->fromQuery($query)->differenceToSql(
+            InterpreterFactory::connection($connection)->fromDump($dump)
+        );
     }
 
     /**

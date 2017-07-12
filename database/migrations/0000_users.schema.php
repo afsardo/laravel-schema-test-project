@@ -1,10 +1,10 @@
 <?php
 
-use App\Schema\Schema as BaseSchema;
+use App\Schema\SchemaMigration;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 
-class UsersSchema extends BaseSchema
+class UsersSchema extends SchemaMigration
 {
     /**
      * The table for this schema.
@@ -26,7 +26,6 @@ class UsersSchema extends BaseSchema
             $table->string('email')->unique();
             $table->string('password');
             $table->string('handle')->unique();
-            $table->boolean('is_admin')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

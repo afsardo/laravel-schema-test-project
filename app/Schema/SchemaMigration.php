@@ -4,7 +4,7 @@ namespace App\Schema;
 
 use Illuminate\Database\Migrations\Migration;
 
-class Schema extends Migration {
+class SchemaMigration extends Migration {
 
     /**
      * Dump the migration state.

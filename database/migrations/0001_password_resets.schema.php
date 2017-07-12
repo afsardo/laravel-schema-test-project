@@ -1,10 +1,10 @@
 <?php
 
-use App\Schema\Schema as BaseSchema;
+use App\Schema\SchemaMigration;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 
-class PasswordResetsSchema extends BaseSchema
+class PasswordResetsSchema extends SchemaMigration
 {
     /**
      * The table for this schema.
