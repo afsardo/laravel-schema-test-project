@@ -227,15 +227,11 @@ class SchemaMigrator
             $name = $this->getMigrationName($file)
         );
 
-        $this->note("<comment>Rolling back:</comment> {$name}");
-
         if ($pretend) {
             return $this->pretendToRun($instance, 'down', null);
         }
 
         $this->runMigration($instance, 'down', null);
-
-        $this->note("<info>Rolled back:</info>  {$name}");
     }
 
     /**
