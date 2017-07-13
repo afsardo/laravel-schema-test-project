@@ -4,7 +4,7 @@ namespace App\Schema;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Facades\App\Schema\InterpreterFactory;
+use Facades\App\Schema\Interpreter;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
@@ -105,6 +105,10 @@ class SchemaMigrator
         foreach ($migrations as $file) {
             $this->runUp($file, $pretend);
         }
+
+        if (count($this->getNotes()) == 0) {
+            $this->note('<info>Nothing to migrate.</info>');
+        }
     }
 
     /**
@@ -128,11 +132,7 @@ class SchemaMigrator
             return $this->pretendToRun($migration, 'up', $dump);
         }
 
-        $this->note("<comment>Migrating:</comment> {$name}");
-
         $this->runMigration($migration, 'up', $dump);
-
-        $this->note("<info>Migrated:</info>  {$name}");
     }
 
     /**
@@ -251,20 +251,24 @@ class SchemaMigrator
             $migration->getConnection()
         );
 
-        $callback = function () use ($migration, $method, $dump, $connection) {
-            foreach ($this->getQueries($migration, $method) as $query) {
-                $queries = $this->getQueriesDiff($migration, $query['query'], $dump);
-                if ($queries) {
-                    foreach($queries as $query) {
-                        $connection->statement($query);
-                    }
-                }
-            }
-        };
 
-        $this->getSchemaGrammar($connection)->supportsSchemaTransactions()
-                    ? $connection->transaction($callback)
-                    : $callback();
+        $queries = $this->getQueriesDiff($migration, $this->getQueries($migration, $method), $dump);
+        if (count($queries) > 0) {
+            $name = get_class($migration);
+            $this->note("<comment>Migrating:</comment> {$name}");
+
+            $callback = function () use ($connection, $queries) {
+                foreach($queries as $query) {
+                    $connection->statement($query);
+                }
+            };
+
+            $this->getSchemaGrammar($connection)->supportsSchemaTransactions()
+                        ? $connection->transaction($callback)
+                        : $callback();
+
+            $this->note("<info>Migrated:</info>  {$name}");
+        }    
     }
 
     /**
@@ -276,15 +280,10 @@ class SchemaMigrator
      */
     protected function pretendToRun($migration, $method, $dump)
     {
-        foreach ($this->getQueries($migration, $method) as $query) {
-            $name = get_class($migration);
-            
-            $queries = $this->getQueriesDiff($migration, $query['query'], $dump);
-            if ($queries) {
-                foreach($queries as $query) {
-                    $this->note("<info>{$name}:</info> {$query}");
-                }
-            }
+        $name = get_class($migration);
+        $queries = $this->getQueriesDiff($migration, $this->getQueries($migration, $method), $dump);
+        foreach ($queries as $query) {
+            $this->note("<info>{$name}:</info> {$query}");
         }
     }
 
@@ -296,14 +295,14 @@ class SchemaMigrator
      * @param  array  $dump
      * @return array
      */
-    protected function getQueriesDiff($migration, $query, $dump)
+    protected function getQueriesDiff($migration, $queries, $dump)
     {
         $connection = $this->resolveConnection(
             $migration->getConnection()
         );
 
-        return InterpreterFactory::connection($connection)->fromQuery($query)->differenceToSql(
-            InterpreterFactory::connection($connection)->fromDump($dump)
+        return Interpreter::connection($connection)->fromQueries($queries)->differenceSql(
+            Interpreter::connection($connection)->fromDump($dump)
         );
     }
 

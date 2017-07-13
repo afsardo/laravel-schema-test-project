@@ -5,14 +5,17 @@ use Illuminate\Database\Schema\Blueprint;
 Artisan::command('test', function() {
 
     $blueprint = new Blueprint('users', function($table) {
+        // ONE MORE
+        $table->unsignedInteger('company_id')->nullable();
+
+        // JUST FOR TESTING
         $table->string('checking')->default('1');
         $table->binary('data');
         $table->boolean('is_admin')->default(false);
-        $table->integer('coach_id')->unsigned()->after('id');
-        $table->uuid('uuid')->first();
-        $table->timeTz('sunrise')->comment('my comment')->virtualAs("rise_up");
+        $table->integer('coach_id')->unsigned();
+        $table->uuid('uuid');
+        $table->timeTz('sunrise');
         $table->string('checking30', 30)->nullable();
-        $table->timestampsTz();
     });
 
     $conn = app('db')->connection();
