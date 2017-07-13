@@ -11,9 +11,21 @@ class SqliteTable implements TableSchema {
 
     protected $name;
     protected $columns;
+    protected $toDrop;
 
     public function __construct($connection) {
         $this->connection = $connection;
+        $this->toDrop = false;
+    }
+
+    public function setToDrop()
+    {
+        $this->toDrop = true;
+    }
+
+    public function toDrop()
+    {
+        return $this->toDrop;
     }
 
     public function setName($name)

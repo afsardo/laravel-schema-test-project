@@ -4,6 +4,7 @@ namespace App\Schema\Interpreters\Sqlite;
 
 use App\Schema\Interpreters\Parser;
 use App\Schema\Interpreters\Sqlite\SqliteTable;
+use App\Schema\Exceptions\TableQueryNotParsableException;
 
 class SqliteQueryParser implements Parser {
 
@@ -28,8 +29,10 @@ class SqliteQueryParser implements Parser {
                 $table->setColumns($this->parseColumns($query));
             } else if ($this->isIndex($query)) {
                 // IMPLEMENT INDEXES
+            } else if ($this->isDrop($query)) {
+                $table->setToDrop();
             } else {
-                throw new \Exception("Query Parser: Couldn't parse query '{$query}'");
+                throw new TableQueryNotParsableException("Table Query Parser: Couldn't parse query '{$query}'");
             }
         }
         
@@ -39,6 +42,11 @@ class SqliteQueryParser implements Parser {
     private function isCreate($query)
     {
         return strpos(strtolower($query), 'create table') !== false;
+    }
+
+    private function isDrop($query)
+    {
+        return strpos(strtolower($query), 'drop table') !== false;
     }
 
     private function parseName($query)

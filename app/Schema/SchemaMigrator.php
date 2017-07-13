@@ -251,7 +251,6 @@ class SchemaMigrator
             $migration->getConnection()
         );
 
-
         $queries = $this->getQueriesDiff($migration, $this->getQueries($migration, $method), $dump);
         if (count($queries) > 0) {
             $name = get_class($migration);
