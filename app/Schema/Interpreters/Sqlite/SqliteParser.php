@@ -45,7 +45,8 @@ abstract class SqliteParser {
     {
         preg_match("/\"(.*)\"/", $field, $field);
         if (! array_key_exists(1, $field)) {
-            throw new \Exception("Parser: couldn't parse column name from '{$field}'");
+            $fieldError = var_export($field, true);
+            throw new \Exception("Parser: couldn't parse column name from '{$fieldError}'");
         }
 
         return $field[1];
@@ -55,7 +56,8 @@ abstract class SqliteParser {
     {
         $attributes = explode(" ", trim(str_replace("\"{$name}\"", "", $field)));
         if (! array_key_exists(0, $attributes)) {
-            throw new \Exception("Parser: couldn't parse column type from '{$field}'");
+            $fieldError = var_export($field, true);
+            throw new \Exception("Parser: couldn't parse column type from '{$fieldError}'");
         }
 
         return $attributes[0];

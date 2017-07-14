@@ -8,10 +8,12 @@ class Interpreter {
 
     protected $queriesParsers = [
         'sqlite' => \App\Schema\Interpreters\Sqlite\SqliteQueryParser::class,
+        'mysql' => \App\Schema\Interpreters\Mysql\MysqlQueryParser::class,
     ];
 
     protected $dumpParsers = [
         'sqlite' => \App\Schema\Interpreters\Sqlite\SqliteDumpParser::class,
+        'mysql' => \App\Schema\Interpreters\Mysql\MysqlDumpParser::class,
     ];
 
     public function connection($connection) {

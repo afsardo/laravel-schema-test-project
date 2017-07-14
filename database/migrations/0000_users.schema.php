@@ -28,7 +28,7 @@ class UsersSchema extends SchemaMigration
             $table->rememberToken();
             $table->nullableTimestamps();
 
-            /* 
+            /* */
             $table->bigInteger('voters1')->nullable();    // BIGINT equivalent for the database.
             $table->binary('data')->nullable(); // BLOB equivalent for the database.
             $table->boolean('confirmed')->default(true);   // BOOLEAN equivalent for the database.
@@ -64,7 +64,7 @@ class UsersSchema extends SchemaMigration
             $table->unsignedSmallInteger('votes4')->nullable();  // Unsigned SMALLINT equivalent for the database.
             $table->unsignedTinyInteger('votes5')->nullable();   // Unsigned TINYINT equivalent for the database.
             $table->uuid('uuid')->first()->nullable(); // UUID equivalent for the database.
-             */
+            /* */
         });
     }
 

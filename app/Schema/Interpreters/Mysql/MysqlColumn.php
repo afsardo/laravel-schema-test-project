@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Schema\Interpreters\Sqlite;
+namespace App\Schema\Interpreters\Mysql;
 
 use App\Schema\Interpreters\ColumnSchema;
 
-class SqliteColumn implements ColumnSchema {
+class MysqlColumn implements ColumnSchema {
 
     protected $name;
     protected $type;
@@ -12,27 +12,38 @@ class SqliteColumn implements ColumnSchema {
     protected $default;
     protected $nullable;
     protected $increments;
+    protected $unsigned;
 
     private static $dictionary = [
+        "char" => "char",
         "varchar" => "string",
         "text" => "text",
-        "integer" => "integer",
-        "float" => "float",
-        "numeric" => "decimal",
+        "mediumtext" => "mediumText",
+        "longtext" => "longText",
+        "bigint" => "bigInteger",
+        "int" => "integer",
+        "mediumint" => "mediumInteger",
+        "tinyint" => "tinyInteger",
+        "smallint" => "smallInteger",
+        "double" => "double",
+        "decimal" => "decimal",
+        "enum" => "enum",
+        "json" => "json",
         "date" => "date",
-        "datetime" => "dateTime",
+        "datetime" => "datetime",
         "time" => "time",
+        "timestamp" => "timestamp",
         "blob" => "binary",
-        "tinyint" => "boolean",
     ];
 
-    public function __construct($name, $type, $size = null, $default = null, $nullable = true, $increments = false) {
+    public function __construct($name, $type, $size = null, $default = null, $nullable = true, $increments = false, $unsigned = false) {
         $this->name = $name;
         $this->type = $type;
         $this->size = $size;
         $this->default = $default;
         $this->nullable = $nullable;
         $this->increments = $increments;
+        $this->unsigned = $unsigned;
     }
 
     public function name()
@@ -63,7 +74,7 @@ class SqliteColumn implements ColumnSchema {
 
     public function unsigned()
     {
-        return false;
+        return $this->unsigned;
     }
 
     public function increments()

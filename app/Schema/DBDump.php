@@ -38,7 +38,16 @@ class DBDump {
 
     public function mysqlDump()
     {
-        return DB::connection($this->conn)->select("DESCRIBE {$this->table}");
+        $columns = DB::connection($this->conn)->select("DESCRIBE {$this->table}");
+
+        if (count($columns) <= 0) {
+            return null;
+        }
+
+        return [
+            "table" => $this->table,
+            "columns" => $columns,
+        ];
     }
 
     public function pgsqlDump()
