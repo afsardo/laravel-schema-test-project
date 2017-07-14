@@ -21,15 +21,18 @@ abstract class MysqlParser {
             if ($size) {
                 $type = $this->stripSizeFromType($type, $size);
             }
+
             $default = $this->parseDefaultValue($field);
             $nullable = $this->parseNullable($field);
             $increments = $this->parseIncrements($field);
             $unsigned = $this->parseUnsigned($field);
             
-            $columns[] = new MysqlColumn($name, $type, $size, $default, $nullable, $increments, $unsigned);
+            $column = new MysqlColumn($name, $type, $size, $default, $nullable, $increments, $unsigned);
+
+            $columns[] = $column;
         }
 
         return collect($columns);
     }
-    
+
 }

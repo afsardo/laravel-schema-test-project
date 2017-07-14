@@ -20,4 +20,12 @@ interface ColumnSchema {
 
     public function equals(ColumnSchema $other);
 
+    public function isDouble();
+
+    public function isDecimal();
+
+    public function isEnum();
+
+    public function isBoolean();
+
 }

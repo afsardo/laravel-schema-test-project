@@ -14,7 +14,7 @@ class MysqlColumn implements ColumnSchema {
     protected $increments;
     protected $unsigned;
 
-    private static $dictionary = [
+    public static $dictionary = [
         "char" => "char",
         "varchar" => "string",
         "text" => "text",
@@ -44,6 +44,19 @@ class MysqlColumn implements ColumnSchema {
         $this->nullable = $nullable;
         $this->increments = $increments;
         $this->unsigned = $unsigned;
+
+        $this->processTypeSize();
+    }
+
+    private function processTypeSize()
+    {
+        $size = explode(", ", str_replace("'", "", $this->size));
+
+        if (count($size) > 1) {
+            $this->size = $size;
+        } else {
+            $this->size = empty($size[0]) ? null : $size[0];
+        }
     }
 
     public function name()
@@ -54,7 +67,7 @@ class MysqlColumn implements ColumnSchema {
     public function type()
     {
 
-        return self::dictionary[$this->type];
+        return self::$dictionary[$this->type];
     }
 
     public function size()
@@ -85,6 +98,26 @@ class MysqlColumn implements ColumnSchema {
     public function equals(ColumnSchema $other)
     {
         return $this->name() === $other->name();
+    }
+
+    public function isDouble()
+    {
+        return $this->type == "double";
+    }
+
+    public function isDecimal()
+    {
+        return $this->type == "decimal";
+    }
+
+    public function isEnum()
+    {
+        return $this->type == "enum";
+    }
+
+    public function isBoolean()
+    {
+        return $this->type == "tinyint" && $this->default == 1;
     }
 
 }

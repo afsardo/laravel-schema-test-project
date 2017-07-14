@@ -28,7 +28,7 @@ class UsersSchema extends SchemaMigration
             $table->rememberToken();
             $table->nullableTimestamps();
 
-            /* */
+            /* 
             $table->bigInteger('voters1')->nullable();    // BIGINT equivalent for the database.
             $table->binary('data')->nullable(); // BLOB equivalent for the database.
             $table->boolean('confirmed')->default(true);   // BOOLEAN equivalent for the database.
@@ -52,7 +52,7 @@ class UsersSchema extends SchemaMigration
             $table->smallInteger('voters3')->nullable();  //SMALLINT equivalent for the database.
             $table->softDeletes();  //Adds nullable deleted_at column for soft deletes.
             $table->string('name2', 100)->after('name')->nullable();    // VARCHAR equivalent with a length.
-            $table->text('description3')->default("LOOOL LONG TEXT HERE?");    // TEXT equivalent for the database.
+            $table->text('description3')->nullable();    // TEXT equivalent for the database.
             $table->time('sunrise')->nullable();    // TIME equivalent for the database.
             $table->timeTz('sunrise2')->comment('just testing comments')->nullable();  // TIME (with timezone) equivalent for the database.
             $table->tinyInteger('numbers2')->nullable(); // TINYINT equivalent for the database.

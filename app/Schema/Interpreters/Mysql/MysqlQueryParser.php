@@ -34,7 +34,7 @@ class MysqlQueryParser extends MysqlParser implements Parser {
             }
         }
         
-        dd($table);
+        //dd($table);
         return $table;
     }
 
@@ -71,12 +71,17 @@ class MysqlQueryParser extends MysqlParser implements Parser {
             throw new \Exception("Parser: columns couldn't be parsed.");
         }
 
-        return explode(", `", $fields[2]);
+        $fields = explode(", `", $fields[2]);
+        for($i = 1; $i < count($fields); $i++) {
+            $fields[$i] = "`" . $fields[$i];
+        }
+
+        return $fields;
     }
 
     protected function parseName($field)
     {
-        preg_match("/`(.*)`/", "`" . $field, $field);
+        preg_match("/`(.*?)`/", $field, $field);
         if (! array_key_exists(1, $field)) {
             $fieldError = var_export($field, true);
             throw new \Exception("Parser: couldn't parse column name from '{$fieldError}'");
@@ -87,13 +92,23 @@ class MysqlQueryParser extends MysqlParser implements Parser {
 
     protected function parseType($field, $name)
     {
-        $attributes = explode(" ", trim(str_replace("`{$name}`", "", "`" . $field)));
+        $type = trim(str_replace("`{$name}`", "", $field));
+        preg_match("/\((.*?)\)/", $type, $size);
+        if (array_key_exists(0, $size)) {
+            $size = $size[0];
+        } else {
+            $size = "";
+        }
+
+        $type = str_replace($size, "", $type);
+
+        $attributes = explode(" ", $type);
         if (! array_key_exists(0, $attributes)) {
             $fieldError = var_export($field, true);
             throw new \Exception("Parser: couldn't parse column type from '{$fieldError}'");
         }
 
-        return $attributes[0];
+        return $attributes[0] . $size;
     }
 
     protected function parseSize($type)
@@ -103,7 +118,7 @@ class MysqlQueryParser extends MysqlParser implements Parser {
             return null;
         }
 
-        return $size[1];            
+        return $size[1];    
     }
 
     protected function stripSizeFromType($type, $size)

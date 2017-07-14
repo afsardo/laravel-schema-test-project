@@ -86,7 +86,13 @@ class TableSchema {
         $blueprint = new Blueprint($this->name, function($table) use ($difference) {
             foreach($difference as $column) {
                 if ($column->size()) {
-                    $c = $table->{$column->type()}($column->name(), $column->size());
+                    if ($column->isDecimal() || $column->isDouble()) {
+                        $c = $table->{$column->type()}($column->name(), $column->size()[0], $column->size()[1]);
+                    } else if ($column->isBoolean()) {
+                        $c = $table->boolean($column->name());
+                    } else {
+                        $c = $table->{$column->type()}($column->name(), $column->size());
+                    }
                 } else {
                     $c = $table->{$column->type()}($column->name());
                 }

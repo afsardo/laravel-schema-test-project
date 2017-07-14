@@ -43,7 +43,7 @@ class MysqlDumpParser extends MysqlParser implements Parser {
 
     protected function parseSize($type)
     {
-        preg_match("/\((.*)\)/", $type, $size);
+        preg_match("/\((.*?)\)/", $type, $size);
         if (! array_key_exists(1, $size)) {
             return null;
         }

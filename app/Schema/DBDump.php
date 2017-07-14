@@ -3,6 +3,7 @@
 namespace App\Schema;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class DBDump {
 
@@ -38,16 +39,21 @@ class DBDump {
 
     public function mysqlDump()
     {
-        $columns = DB::connection($this->conn)->select("DESCRIBE {$this->table}");
+        try {
+            $columns = DB::connection($this->conn)->select("DESCRIBE {$this->table}");
+            
+            if (count($columns) <= 0) {
+                return null;
+            }
 
-        if (count($columns) <= 0) {
+            return [
+                "table" => $this->table,
+                "columns" => $columns,
+            ];
+
+        } catch(QueryException $e) {
             return null;
         }
-
-        return [
-            "table" => $this->table,
-            "columns" => $columns,
-        ];
     }
 
     public function pgsqlDump()

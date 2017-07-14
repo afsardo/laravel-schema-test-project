@@ -13,7 +13,7 @@ class SqliteColumn implements ColumnSchema {
     protected $nullable;
     protected $increments;
 
-    private static $dictionary = [
+    public static $dictionary = [
         "varchar" => "string",
         "text" => "text",
         "integer" => "integer",
@@ -43,7 +43,7 @@ class SqliteColumn implements ColumnSchema {
     public function type()
     {
 
-        return self::dictionary[$this->type];
+        return self::$dictionary[$this->type];
     }
 
     public function size()
@@ -74,6 +74,26 @@ class SqliteColumn implements ColumnSchema {
     public function equals(ColumnSchema $other)
     {
         return $this->name() === $other->name();
+    }
+
+    public function isDouble()
+    {
+        return false;
+    }
+
+    public function isDecimal()
+    {
+        return false;
+    }
+
+    public function isEnum()
+    {
+        return false;
+    }
+
+    public function isBoolean()
+    {
+        return false;
     }
 
 }
