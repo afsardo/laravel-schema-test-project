@@ -22,7 +22,13 @@ class DBDump {
             $conn = config('database.default');
         }
 
-        return (new static($table, $conn))->{$conn . 'Dump'}();
+        $dump = (new static($table, $conn))->{$conn . 'Dump'}();
+
+        if (is_array($dump) && count($dump) <= 0) {
+            return null;
+        }
+
+        return $dump;
     }
 
     public function sqliteDump()

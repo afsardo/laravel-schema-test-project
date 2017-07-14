@@ -105,7 +105,7 @@ class SchemaMigrator
         foreach ($migrations as $file) {
             $this->runUp($file, $pretend);
         }
-
+        
         if (count($this->getNotes()) == 0) {
             $this->note('<info>Nothing to migrate.</info>');
         }
@@ -248,22 +248,30 @@ class SchemaMigrator
         );
 
         $queries = $this->getQueriesDiff($migration, $this->getQueries($migration, $method), $dump);
-        if (count($queries) > 0) {
-            $name = get_class($migration);
-            $this->note("<comment>Migrating:</comment> {$name}");
+        if (count($queries) <= 0) {
+            return;
+        }
 
-            $callback = function () use ($connection, $queries) {
-                foreach($queries as $query) {
-                    $connection->statement($query);
-                }
-            };
+        $name = get_class($migration);
+        if ($method == 'up') {
+            $methodName = 'Migrating';
+        } else {
+            $methodName = 'Rolling back';
+        }
 
-            $this->getSchemaGrammar($connection)->supportsSchemaTransactions()
-                        ? $connection->transaction($callback)
-                        : $callback();
+        $this->note("<comment>{$methodName}:</comment> {$name}");
 
-            $this->note("<info>Migrated:</info>  {$name}");
-        }    
+        $callback = function () use ($connection, $queries) {
+            foreach($queries as $query) {
+                $connection->statement($query);
+            }
+        };
+
+        $this->getSchemaGrammar($connection)->supportsSchemaTransactions()
+                    ? $connection->transaction($callback)
+                    : $callback();
+
+        $this->note("<info>{$methodName}:</info> {$name}");  
     }
 
     /**
@@ -296,9 +304,15 @@ class SchemaMigrator
             $migration->getConnection()
         );
 
-        return Interpreter::connection($connection)->fromQueries($queries)->differenceSql(
-            Interpreter::connection($connection)->fromDump($dump)
-        );
+        if (is_null($dump)) {
+            return array_map(function($query) {
+                return $query['query'];
+            }, $queries);
+        }
+
+        $newState = Interpreter::connection($connection)->fromQueries($queries);
+
+        return $newState->toDrop() ? $newState->drop() : $newState->differenceSql(Interpreter::connection($connection)->fromDump($dump));
     }
 
     /**
